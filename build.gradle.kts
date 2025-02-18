@@ -17,3 +17,21 @@ dependencies {
 
     compileOnly("org.jetbrains:annotations:24.0.0")
 }
+
+val fatJar by tasks.registering(Jar::class) {
+    group = "build"
+
+    archiveClassifier.set("all")
+    dependsOn(tasks.jar)
+
+    manifest {
+        attributes["Main-Class"] = "io.github.gaming32.pactlloopbackgui.Main"
+    }
+
+    from(
+        (tasks.jar.get().outputs.files + configurations.runtimeClasspath.get().files)
+            .map { if (it.isDirectory) it else zipTree(it) }
+    )
+    duplicatesStrategy = DuplicatesStrategy.WARN
+}
+tasks.assemble.get().dependsOn(fatJar)
