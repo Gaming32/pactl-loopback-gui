@@ -6,6 +6,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -38,12 +39,27 @@ public final class Pactl {
     }
 
     public static List<PactlModule> listModules() throws IOException {
+        final var result = new ArrayList<PactlModule>();
         try (var reader = runProcess("list", "short", "modules")) {
-            return reader.lines()
-                .map(line -> line.split("\t", 4))
-                .map(parts -> new PactlModule(Integer.parseInt(parts[0]), parts[1], PactlArguments.parse(parts[2])))
-                .toList();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                final var parts = line.split("\t", 4);
+                final Map<String, String> arguments;
+                if (parts.length == 3 && parts[2].equals("{")) {
+                    // PipeWire SPA json configuration is not supported, and is treated as no configuration
+                    arguments = Map.of();
+                    while (!"\t\t}".equals(line = reader.readLine())) {
+                        if (line == null) {
+                            throw new IOException("Unterminated SPA configuration");
+                        }
+                    }
+                } else {
+                    arguments = PactlArguments.parse(parts[2]);
+                }
+                result.add(new PactlModule(Integer.parseInt(parts[0]), parts[1], arguments));
+            }
         }
+        return result;
     }
 
     public static int loadModule(String name) throws IOException {
