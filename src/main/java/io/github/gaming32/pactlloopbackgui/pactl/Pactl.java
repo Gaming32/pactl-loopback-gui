@@ -48,10 +48,11 @@ public final class Pactl {
                 if (parts.length == 3 && parts[2].equals("{")) {
                     // PipeWire SPA json configuration is not supported, and is treated as no configuration
                     arguments = Map.of();
-                    while (!"\t\t}".equals(line = reader.readLine())) {
-                        if (line == null) {
-                            throw new IOException("Unterminated SPA configuration");
-                        }
+                    while ((line = reader.readLine()) != null) {
+                        if (line.endsWith("}")) break;
+                    }
+                    if (line == null) {
+                        throw new IOException("Unterminated SPA configuration");
                     }
                 } else {
                     arguments = PactlArguments.parse(parts[2]);
