@@ -16,6 +16,11 @@ public final class PactlArguments {
         return parseInt(arguments.get(key));
     }
 
+    public static int getIntOrDefault(Map<String, String> arguments, String key, int defaultValue) {
+        final var result = getInt(arguments, key);
+        return result != null ? result : defaultValue;
+    }
+
     @Nullable
     public static Integer putInt(Map<String, String> arguments, String key, int value) {
         return parseInt(arguments.put(key, Integer.toString(value)));
@@ -23,12 +28,21 @@ public final class PactlArguments {
 
     @Nullable
     private static Integer parseInt(@Nullable String value) {
-        return value != null ? Integer.parseInt(value) : null;
+        try {
+            return value != null ? Integer.parseInt(value) : null;
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     @Nullable
     public static Boolean getBoolean(Map<String, String> arguments, String key) {
         return parseBoolean(arguments.get(key));
+    }
+
+    public static boolean getBooleanOrDefault(Map<String, String> arguments, String key, boolean defaultValue) {
+        final var result = getBoolean(arguments, key);
+        return result != null ? result : defaultValue;
     }
 
     @Nullable

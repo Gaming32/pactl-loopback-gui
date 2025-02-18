@@ -1,42 +1,21 @@
 package io.github.gaming32.pactlloopbackgui;
 
-import io.github.gaming32.pactlloopbackgui.pactl.Pactl;
-import io.github.gaming32.pactlloopbackgui.pactl.PactlModule;
-import io.github.gaming32.pactlloopbackgui.pactl.PactlSourceOrSink;
+import io.github.gaming32.pactlloopbackgui.gui.MainPanel;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.stream.Collectors;
+import javax.swing.*;
 
 public class Main {
-    public static void main(String[] args) throws IOException {
-        System.setProperty("pactl.commandWrapper", "bash -c");
+    public static final String TITLE = "PulseAudio Loopback GUI";
 
-        Pactl.listModules()
-            .stream()
-            .filter(module -> module.name().equals("module-loopback"))
-            .map(PactlModule::index)
-            .forEach(index -> {
-                try {
-                    Pactl.unloadModule(index);
-                } catch (IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            });
+    public static void main(String[] args) {
+        final var frame = new JFrame(TITLE);
+        final var panel = new MainPanel();
+        frame.add(panel);
+        frame.pack();
 
-        final var sources = new ArrayList<>(Pactl.listSources());
-        final var sinks = Pactl.listSinks();
+        new Timer(2000, e -> panel.refresh()).start();
 
-        final var sinkIds= sinks.stream().map(PactlSourceOrSink::index).collect(Collectors.toSet());
-        sources.removeIf(s -> sinkIds.contains(s.index()));
-
-        final var module = Pactl.loadModule("module-loopback", Map.of(
-            "latency_msec", "20",
-            "source", Integer.toString(sources.getFirst().index()),
-            "sink", Integer.toString(sinks.getFirst().index())
-        ));
-        System.out.println("Loaded module " + module);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
     }
 }

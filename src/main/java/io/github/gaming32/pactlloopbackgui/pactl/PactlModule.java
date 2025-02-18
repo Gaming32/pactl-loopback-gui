@@ -5,6 +5,6 @@ import java.util.Map;
 public record PactlModule(int index, String name, Map<String, String> arguments) {
     @Override
     public String toString() {
-        return index + "\t" + name + "\t" + PactlArguments.toString(arguments) + "\t";
+        return index + "\t" + name + "\t" + PactlArguments.toString(arguments);
     }
 }
