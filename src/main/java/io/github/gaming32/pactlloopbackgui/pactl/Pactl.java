@@ -49,7 +49,7 @@ public final class Pactl {
                     // PipeWire SPA json configuration is not supported, and is treated as no configuration
                     arguments = Map.of();
                     while ((line = reader.readLine()) != null) {
-                        if (line.trim().endsWith("}")) break;
+                        if (line.trim().equals("}")) break;
                     }
                     if (line == null) {
                         throw new IOException("Unterminated SPA configuration");
